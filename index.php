@@ -6,4 +6,12 @@
  * Time: 10:25 AM
  */
 
-echo "Hi, my name is Jim, and I am a level 10 geek" . '<br/>' . "You owe me 120";
+$temp = 'Jim';
+echo 'Hi, my name is';
+echo $temp;
+$temp = 'geek';
+echo 'I am a';
+echo $temp;
+$temp = 10;
+echo 'My level is';
+echo $temp;
