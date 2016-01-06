@@ -15,3 +15,10 @@ echo $temp;
 $temp = 10;
 echo 'My level is';
 echo $temp;
+
+echo '<br/>';
+
+$hoursworked = 10;
+$rate = 12;
+$total = $hoursworked * $rate;
+echo 'You owe me '.$total;
