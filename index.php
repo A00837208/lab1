@@ -18,7 +18,7 @@ echo $temp;
 
 echo '<br/>';
 
-$hoursworked = 10;
+$hoursworked = $_GET['hours'];
 $rate = 12;
 $total = $hoursworked * $rate;
 
