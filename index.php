@@ -5,45 +5,57 @@
  * Date: 06/01/2016
  * Time: 10:25 AM
  */
-$position = $_GET['board'];
-$squares = str_split($position);
+$squares = $_GET['board'];
 
-if (winner('x', $squares)) {
-    echo 'You win.';
-} else if (winner('o', $squares)) {
-    echo 'I win.';
-} else {
-    echo 'No winner yet.';
-}
+$game = new Game($squares);
+if ($game->winner('x'))
+    echo 'You win. Lucky guesses!';
+else if ($game->winner('o'))
+    echo 'I win. Muahahahaha';
+else
+    echo 'No winner yet, but you are losing.';
 
-function winner($token,$position) {
+class Game
+{
+    var $position;
 
-    $result = false;
+    function __construct($squares)
+    {
+        $this->position = str_split($squares);
+    }
 
-    for ($row = 0; $row < 3; $row++) {
-        if (($position[3 * $row] == $token) && ($position[3 * $row + 1]
-                == $token) && ($position[3 * $row + 2] == $token)
+    function winner($token) {
+
+        $result = false;
+
+        for ($row = 0; $row < 3; $row++) {
+            if (($this->position[3 * $row] == $token) && ($this->position[3 * $row + 1]
+                    == $token) && ($this->position[3 * $row + 2] == $token)
+            ) {
+                $result = true;
+            }
+        }
+
+        for ($col = 0; $col < 3; $col++) {
+            if (($this->position[$col] == $token) && ($this->position[$col + 3]
+                    == $token) && ($this->position[$col + 6] == $token)
+            ) {
+                $result = true;
+            }
+        }
+
+        if (($this->position[0] == $token) &&
+            ($this->position[4] == $token) &&
+            ($this->position[8] == $token)
         ) {
             $result = true;
         }
-    }
-
-    for ($col = 0; $col < 3; $col++) {
-        if (($position[$col] == $token) && ($position[$col+3]
-            == $token) && ($position[$col+6] == $token)) {
+        if (($this->position[2] == $token) &&
+            ($this->position[4] == $token) &&
+            ($this->position[6] == $token)
+        ) {
             $result = true;
         }
-    }
-
-    if (($position[0] == $token) &&
-        ($position[4] == $token) &&
-        ($position[8] == $token)) {
-            $result = true;
-    }
-    if (($position[2] == $token) &&
-        ($position[4] == $token) &&
-        ($position[6] == $token)) {
-            $result = true;
-    }
         return $result;
+    }
 }
