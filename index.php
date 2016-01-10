@@ -5,36 +5,52 @@
  * Date: 06/01/2016
  * Time: 10:25 AM
  */
-if (!isset($_GET['board'])) { // if board parameter empty initialize board to empty
+if (!isset($_GET['board'])) { // if board parameter undefined initialize board to empty
     $squares = '---------';
+    $first_move = 1;
 } else {
     $squares = $_GET['board'];
+    $first_move = 0;
 }
 
 $game = new Game($squares);
+if ($first_move == 0) { // If it is not the first move the bot will place an 'o' on the board
+    $game->pick_move();
+}
 $game->display();
 
 // link to game with empty board parameter to 'restart' the game
 $play_again = '<td><a href="http://localhost:60/Lab1/index.php" style="text-decoration: none">Play Again</a></td>';
 
 if ($game->winner('x')) {
-    echo 'You win. Lucky guesses!</br></br>';
+    echo 'You win. Lets play a real game like chess.</br></br>';
     echo $play_again;
 } else if ($game->winner('o')) {
-    echo 'I win. Muahahahaha</br></br>';
+    echo 'I win and YOU lose, HA!</br></br>';
+    echo $play_again;
+} else if ($game->tie()) {
+    echo 'Tie Game, booooooring.</br></br>';
     echo $play_again;
 } else {
-    echo 'No winner yet, but you are losing.';
+    echo 'I haven\'t beat you yet...';
 }
 
-class Game
-{
+class Game {
     var $position;
     var $newposition;
 
-    function __construct($squares)
-    {
+    function __construct($squares) {
         $this->position = str_split($squares);
+    }
+
+    // determine if the board still contains an unused space, if no new moves game is a tie
+    function tie() {
+        for ($i = 0; $i < 9; $i++) {
+            if($this->position[$i] == '-') {
+                return false;
+            }
+        }
+        return true;
     }
 
     function winner($token) {
@@ -87,7 +103,6 @@ class Game
     }
 
     function show_cell($which) {
-        $move_count = 0; // keep track of number of moves to determine turn
         $token = $this->position[$which];
 
         // deal with the easy case
@@ -98,22 +113,93 @@ class Game
         // now the hard case
         $this->newposition = $this->position; //copy the original
 
-        // checks each cell for x or o, if found increase move count by 1
-        for($i = 0; $i < 9; $i++) {
-            if($this->newposition[$i] <> '-') {
-                $move_count++;
-            }
-        }
-
-        if ($move_count % 2 == 0) { // if move count is even X's turn
-            $this->newposition[$which] = 'x'; //this would be our move
-        } else { // if move count is odd O's turn
-            $this->newposition[$which] = 'o'; // this would be their move
-        }
+        $this->newposition[$which] = 'x'; //this would be our move
 
         $move = implode($this->newposition); // make a string from the board array
         $link = 'http://localhost:60/Lab1/index.php?board=' . $move; // this is what we want the link to be
                                     // so return a cell containing an anchor and showing a hyphen
         return '<td><a href="'. $link . '" style="text-decoration: none">-</a></td>';
+    }
+
+    function pick_move() {
+        // Row loss defense
+        for ($row = 0; $row < 3; $row++) {
+            if (($this->position[3 * $row] == 'x') && ($this->position[3 * $row + 1]
+                    == '-') && ($this->position[3 * $row + 2] == 'x')
+            ) {
+                $this->position[3 * $row + 1] = 'o';
+                return;
+            }
+            if (($this->position[3 * $row] == '-') && ($this->position[3 * $row + 1]
+                    == 'x') && ($this->position[3 * $row + 2] == 'x')
+            ) {
+                $this->position[3 * $row] = 'o';
+                return;
+            }
+            if (($this->position[3 * $row] == 'x') && ($this->position[3 * $row + 1]
+                    == 'x') && ($this->position[3 * $row + 2] == '-')
+            ) {
+                $this->position[3 * $row + 2] = 'o';
+                return;
+            }
+        }
+
+        // Column loss defense
+        for ($col = 0; $col < 3; $col++) {
+            if (($this->position[$col] == 'x') && ($this->position[$col + 3]
+                    == '-') && ($this->position[$col + 6] == 'x')
+            ) {
+                $this->position[$col + 3] = 'o';
+                return;
+            }
+            if (($this->position[$col] == '-') && ($this->position[$col + 3]
+                    == 'x') && ($this->position[$col + 6] == 'x')
+            ) {
+                $this->position[$col] = 'o';
+                return;
+            }
+            if (($this->position[$col] == 'x') && ($this->position[$col + 3]
+                    == 'x') && ($this->position[$col + 6] == '-')
+            ) {
+                $this->position[$col + 6] = 'o';
+                return;
+            }
+        }
+
+        //Left to Right diagonal loss defense
+        if($this->position[0] == 'x' && $this->position[8] == 'x') {
+            $this->position[4] = 'o';
+            return;
+        }
+        if($this->position[0] == 'x' && $this->position[4] == 'x') {
+            $this->position[8] = 'o';
+            return;
+        }
+        if($this->position[4] == 'x' && $this->position[8] == 'x') {
+            $this->position[0] = 'o';
+            return;
+        }
+
+
+        //Right to Left diagonal loss defense
+        if($this->position[2] == 'x' && $this->position[6] == 'x') {
+            $this->position[4] = 'o';
+            return;
+        }
+        if($this->position[2] == 'x' && $this->position[4] == 'x') {
+            $this->position[6] = 'o';
+            return;
+        }
+        if($this->position[4] == 'x' && $this->position[6] == 'x') {
+            $this->position[2] = 'o';
+            return;
+        }
+
+        for($i=0; $i<9; $i++) {
+            if($this->position[$i] == '-') {
+                $this->position[$i] = 'o';
+                return;
+            }
+        }
     }
 }
